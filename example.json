@@ -1,0 +1,42 @@
+{
+    "specversion": "1.0",
+    "type": "io.harmony.robot-navigation.status-report.v1",
+    "source": "/edge/fleet/robot/navigation",
+    "subject": "/cloud/dispatch",
+    "datacontenttype": "application/json; charset=utf-8",
+    "id": "45ba9a77-c3fd-40ad-8a22-5ce39682a357",
+    "time": "2022-07-02T06:53:44Z",
+    "site": "fresh-hq",
+    "fleet": "fresh-robotics-dev",
+    "robot": "velma",
+    "data": {
+        "status": "avoid-stranger",
+        "pose": {
+            "position": [
+                5,
+                5,
+                0
+            ],
+            "heading": [
+                0,
+                1,
+                0
+            ]
+        },
+        "twist": {
+            "linear": [
+                0,
+                0,
+                0
+            ],
+            "angular": [
+                0,
+                0,
+                0
+            ]
+        },
+        "building": "crestwood-corporation-plaza",
+        "floor": 1,
+        "charge_remaining": 100
+    }
+}

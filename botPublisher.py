@@ -2,13 +2,16 @@ import paho.mqtt.client as mqtt
 import time
 import json
 import random
-from DataGenerator import *
+from botNavData import *
 import util as util
 from colorama import Fore
 import string
 
+x = [_ for _ in range(10)]
+y = [_ for _ in x]
+z = [0 for _ in x]
 
-class IOTPublisher:
+class botPublisher:
 
     def __init__(self, topic: string, successful_rate: float = 0.99, corrupt_chance: float = 0.005,
                  interval: float = 0.3,
@@ -26,7 +29,7 @@ class IOTPublisher:
         assert topic is not None
         self.topic = topic
         self.client = mqtt.Client()
-        self.data_generator = DataGenerator()
+        #self.data_generator = botNavData.botNavData()
         self.successful_rate = successful_rate
         self.corrupt_chance = corrupt_chance
         self.interval = interval
@@ -39,6 +42,8 @@ class IOTPublisher:
         #generate data to send to the broker at regular intervals
         client.loop_start()
         time.sleep(1)
+        nav_info = botNavData()        
+        counter = 0        
         while True:
             successful = random.random() < self.successful_rate
             corrupted = random.random() > (1 - self.corrupt_chance)
@@ -53,14 +58,16 @@ class IOTPublisher:
                 client.publish(util.topic, corrupted_data)
                 print(f'{Fore.YELLOW}Data Corrupted: {corrupted_data}')
             else:
-                # sent meaningful data
-                sensor_read = self.data_generator.sense()
-                if random.random() > (1 - self.outliter_chance):
-                    # generate data off the chart
-                    print(f'{Fore.BLUE} extreme outliers')
-                    sensor_read = sensor_read * 20 * random.randint(-10, 10)
-                new_data = util.generate_data(sensor_read)
-                json_data = json.dumps(new_data)
+                nav_info.set_id(str(uuid.uuid4()))
+                nav_info.set_time(strict_rfc3339.now_to_rfc3339_utcoffset())
+                nav_info.set_data(
+                    pose_position=[x[counter%len(x)],y[counter%len(x)],z[counter%len(x)]], 
+                    pose_heading=[0,1,0], 
+                    twist_linear=[0,0,0], 
+                    twist_angular=[0,0,0], 
+                    charge_remaining=100-counter%len(x)*5)
+                
+                json_data = json.dumps(dictfier.dictfy(nav_info, query), indent=4)
                 client.publish(self.topic, json_data)
                 print(f'{Fore.GREEN}Message sent: {json_data}')
             time.sleep(self.interval)
@@ -71,9 +78,9 @@ class IOTPublisher:
 # test publisher
 if __name__ == '__main__':
     # Set occurance for corrupted data or failing message by changing the chance values respectively
-    publisher = IOTPublisher(topic=util.topic,
+    publisher = botPublisher(topic=util.topic,
                              successful_rate=0.99,
-                             interval=0.1,
+                             interval=1,
                              corrupt_chance=0.005,
                              outlier_chance=0.03)
     publisher.run()
